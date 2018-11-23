@@ -1,0 +1,3 @@
+[submodule "Software/NMEAParser"]
+	path = Software/NMEAParser
+	url = https://github.com/VisualGPS/NMEAParser
