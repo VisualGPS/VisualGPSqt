@@ -16,7 +16,7 @@ In the process of moving the VisualGPSqt from the NMEAParser to its own repo.
  - You may have to run as administrator depending on your permissions to access the serial port.
 
  ## Windows Build
-  * Make sure that you initialize and update the submodule.
+  * Make sure that you initialize and update the submodules.
  ```bat
    git submodule init
    git submodule update
