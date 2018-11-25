@@ -2,9 +2,6 @@
 A QT application (GUI) that makes use of the VisualGPS/NMEAParser project.
 ![Qt Project making use of the NMEAParser.](./img/ss.png)
 
-## NOT RELEASED YET
-In the process of moving the VisualGPSqt from the NMEAParser to its own repo.
-
 ## Linux build
  * Make sure that you initialize and update the submodule.
  ```bash
