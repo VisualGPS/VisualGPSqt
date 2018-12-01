@@ -75,7 +75,7 @@ void MainWindow::on_action_Connect_triggered()
     ConnectDlg dlg(this);
     dlg.setModal(true);
     ConnectDlgInfo ci;
-    ci.m_nBaud = baud;
+    ci.m_nBaud = static_cast<quint32>(baud);
     ci.m_strPortName = port;
     if( dlg.GetConnectInfo(ci) == QDialog::Accepted) {
         qDebug() << "Port:" << ci.m_strPortName;

@@ -35,7 +35,7 @@ CNMEAParserQt::CNMEAParserQt(QObject *parent) :
 bool CNMEAParserQt::Connect(QString strPort, quint32 nBaud)
 {
     m_SerialPort.close();
-    m_SerialPort.setBaudRate(nBaud);
+    m_SerialPort.setBaudRate(static_cast<qint32>(nBaud));
     m_SerialPort.setFlowControl(QSerialPort::NoFlowControl);
     m_SerialPort.setDataBits(QSerialPort::Data8);
     m_SerialPort.setPortName(strPort);
@@ -59,7 +59,7 @@ void CNMEAParserQt::on_SerialPortReadyRead()
     //qDebug() << "Received" << array.count() << "bytes...";
 
     if(array.size() > 0){
-        ProcessNMEABuffer(array.data(), array.size());
+        ProcessNMEABuffer(array.data(), static_cast<size_t>(array.size()));
 
     }
 }
@@ -71,7 +71,7 @@ CNMEAParserData::ERROR_E CNMEAParserQt::ProcessRxCommand(char *pCmd, char *pData
     qDebug() << "CNMEAParserQt::ProcessRxCommand - Command:" << pCmd << "Data:" << pData;
 
     // Update position anytime we get
-    if(strstr(pCmd, "GGA") != NULL) {
+    if(strstr(pCmd, "GGA") != nullptr) {
         emit NewPositionUpdateGPS();
     }
 

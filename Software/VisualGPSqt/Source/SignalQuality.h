@@ -33,17 +33,27 @@ class CSignalQuality : public QWidget
     Q_OBJECT
 
 private:
+
+    enum CONSTALLATION_TYPE_E {
+        CT_UNKNOWN = 0,
+        CT_GPS,
+        CT_GLONASS,
+        CT_GNSS,
+        CT_GALILEO,
+    };
+
     typedef struct _SAT_INFO_T {
-        int     nPRN;                                                           ///< Satellite pseudo random number (ID)
-        int     nSNR;                                                           ///< Signal to noise ratio
-        bool    bUsedForNav;                                                    ///< Used in nav/timing solution
+        int                     nPRN;                       ///< Satellite pseudo random number (ID)
+        int                     nSNR;                       ///< Signal to noise ratio
+        bool                    bUsedForNav;                ///< Used in nav/timing solution
+        CONSTALLATION_TYPE_E    nConstType;                 ///< Constellation type
     } SAT_INFO_T;
 
     const static int            c_nMaxChannels = 256;       ///< Max number of channels this class can handle
     CNMEAParserQt *             m_pNMEAParser;              ///< The main NMEA parser
 
 public:
-    explicit CSignalQuality(CNMEAParserQt *pNMEAParser, QWidget *parent = 0);
+    explicit CSignalQuality(CNMEAParserQt *pNMEAParser, QWidget *parent = nullptr);
 
 signals:
 

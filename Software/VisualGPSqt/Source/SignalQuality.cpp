@@ -63,12 +63,28 @@ void CSignalQuality::ConsolidateSatData(std::map <int, SAT_INFO_T>&mapSatData) {
     m_pNMEAParser->GetGLGSA(glgsaData);
     m_pNMEAParser->GetGLGSV(glgsvData);
 
+    CNMEAParserData::GSV_DATA_T gagsvData;
+    CNMEAParserData::GSA_DATA_T gagsaData;
+    m_pNMEAParser->GetGAGSA(gagsaData);
+    m_pNMEAParser->GetGAGSV(gagsvData);
+
     // GPS
     SAT_INFO_T satInfo;
     for(int i = 0; i < CNMEAParserData::c_nMaxGSASats; i++) {
         if(gpgsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
             memset(&satInfo, 0, sizeof(satInfo));
             satInfo.nPRN = gpgsaData.pnPRN[i];
+            satInfo.nSNR = 0;
+            satInfo.bUsedForNav = true;
+            mapSatData[satInfo.nPRN] = satInfo;
+        }
+    }
+
+    // Galileo
+    for(int i = 0; i < CNMEAParserData::c_nMaxGSASats; i++) {
+        if(gagsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
+            memset(&satInfo, 0, sizeof(satInfo));
+            satInfo.nPRN = gagsaData.pnPRN[i];
             satInfo.nSNR = 0;
             satInfo.bUsedForNav = true;
             mapSatData[satInfo.nPRN] = satInfo;
@@ -103,6 +119,11 @@ void CSignalQuality::ConsolidateSatData(std::map <int, SAT_INFO_T>&mapSatData) {
             mapSatData[gpgsvData.SatInfo[i].nPRN].nSNR = gpgsvData.SatInfo[i].nSNR;
             mapSatData[gpgsvData.SatInfo[i].nPRN].nPRN = gpgsvData.SatInfo[i].nPRN;
         }
+        // Galileo
+        if(gagsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
+            mapSatData[gagsvData.SatInfo[i].nPRN].nSNR = gagsvData.SatInfo[i].nSNR;
+            mapSatData[gagsvData.SatInfo[i].nPRN].nPRN = gagsvData.SatInfo[i].nPRN;
+        }
         // GLONASS
         if(glgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
             mapSatData[glgsvData.SatInfo[i].nPRN].nSNR = glgsvData.SatInfo[i].nSNR;
@@ -126,7 +147,7 @@ void CSignalQuality::DrawScreen() {
     painter.setBrush(pal.color(QPalette::Dark));
     painter.drawRect(0, 0, width(), height());
 
-    int nTotalSats = (int)mapSatData.size();
+    int nTotalSats = static_cast<int>(mapSatData.size());
 
     //
     // Creaate used in nav database. Use PRN as index
@@ -139,13 +160,13 @@ void CSignalQuality::DrawScreen() {
     //
     qreal dWidth = 0;
     if(nTotalSats > 0) {
-        dWidth = (qreal)width() / (qreal)nTotalSats;
+        dWidth = static_cast<qreal>(width()) / static_cast<qreal>(nTotalSats);
     }
 
     //
     // Create font - size it to the sig qual bar width
     //
-    int nSize = (int)( dWidth * 0.3 );
+    int nSize = static_cast<int>( dWidth * 0.3 );
     if(nSize > 20) nSize = 20;
     QFont Font("Helvetica [Cronyx]", nSize);
     painter.setFont(Font);
@@ -155,7 +176,7 @@ void CSignalQuality::DrawScreen() {
     // PRN
     //
     QFontMetrics fontMetrics(Font);
-    qreal dPRNTextBoxHeight = (qreal)fontMetrics.height() * 1.25;
+    qreal dPRNTextBoxHeight = static_cast<qreal>(fontMetrics.height()) * 1.25;
     QRectF rect(0, 0, dWidth, height() - dPRNTextBoxHeight);
     qreal x = 0;
 
@@ -191,9 +212,9 @@ void CSignalQuality::DrawScreen() {
             }
         }
 
-        qreal dRatio = (qreal)rect.height() / 50.0;
+        qreal dRatio = static_cast<qreal>(rect.height()) / 50.0;
         QRectF rcSignal = rect;
-        qreal dSigQual = (qreal)satInfo.nSNR;
+        qreal dSigQual = static_cast<qreal>(satInfo.nSNR);
 
         qreal dHeight = dSigQual * dRatio;
         rcSignal.setHeight(dHeight);
@@ -212,7 +233,11 @@ void CSignalQuality::DrawScreen() {
         //
         // Now draw the PRN
         //
-        QRect rcPRNText(rcSignal.left(), rect.bottom(), rcSignal.width(), dPRNTextBoxHeight);
+        QRect rcPRNText(
+                    static_cast<int>(rcSignal.left()),
+                    static_cast<int>(rect.bottom()),
+                    static_cast<int>(rcSignal.width()),
+                    static_cast<int>(dPRNTextBoxHeight));
         painter.setPen(pal.color(QPalette::BrightText));
         str = QString("%1").arg(satInfo.nPRN);
         painter.drawText(rcPRNText, str, Qt::AlignVCenter | Qt::AlignHCenter);

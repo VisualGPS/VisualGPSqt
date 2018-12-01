@@ -45,7 +45,7 @@ private:
     QSerialPort         m_SerialPort;                               ///< The serial port
 
 public:
-    explicit CNMEAParserQt(QObject *parent = 0);
+    explicit CNMEAParserQt(QObject *parent = nullptr);
     bool Connect(QString strPort, quint32 nBaud);
 
 signals:
