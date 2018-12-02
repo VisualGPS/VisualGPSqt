@@ -26,6 +26,7 @@
 #define SIGNALQUALITY_H
 
 #include <QWidget>
+#include <string>
 #include "NMEAParserQt.h"
 
 class CSignalQuality : public QWidget
@@ -34,12 +35,15 @@ class CSignalQuality : public QWidget
 
 private:
 
+    ///
+    /// \brief The CONSTALLATION_TYPE_E enum Supported GNSS constellations
+    ///
     enum CONSTALLATION_TYPE_E {
-        CT_UNKNOWN = 0,
-        CT_GPS,
-        CT_GLONASS,
-        CT_GNSS,
-        CT_GALILEO,
+        CT_UNKNOWN = 0,                                     ///< Thie wild west
+        CT_GPS,                                             ///< GPS (US)
+        CT_GLONASS,                                         ///< GLONASS (Russia)
+        CT_GNSS,                                            ///< GNSS (mixed - US/RUSSIA - but can differ)
+        CT_GALILEO,                                         ///< Galileo (EU)
     };
 
     typedef struct _SAT_INFO_T {
@@ -47,7 +51,8 @@ private:
         int                     nSNR;                       ///< Signal to noise ratio
         bool                    bUsedForNav;                ///< Used in nav/timing solution
         CONSTALLATION_TYPE_E    nConstType;                 ///< Constellation type
-    } SAT_INFO_T;
+        std::string             strNmeaSpec;                ///< Part of the NMEA Specification
+    } SAT_INFO_T;                                           ///< Satellite information for all GPS constellations
 
     const static int            c_nMaxChannels = 256;       ///< Max number of channels this class can handle
     CNMEAParserQt *             m_pNMEAParser;              ///< The main NMEA parser
@@ -65,9 +70,18 @@ protected:
     void paintEvent(QPaintEvent *event);
 
 private:
-    void ConsolidateSatData(std::map<int, SAT_INFO_T> &mapSatData);
+    ///
+    /// \brief ConsolidateSatData Here we will combine all of the different GNSS constellations
+    /// into one big constellation which will be stored in mapSatData.
+    ///
+    /// \param mapSatData
+    ///
+    void ConsolidateSatData(std::map<std::string, SAT_INFO_T> &mapSatData);
+
+    ///
+    /// \brief Draws the GPS signal quality
+    ///
     void DrawScreen();
-    CNMEAParserData::SAT_INFO_T GetGSVRecordFromPRN(int nPRN, CNMEAParserData::GSV_DATA_T &gsvData);
 };
 
 #endif // SIGNALQUALITY_H

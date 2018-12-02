@@ -43,91 +43,111 @@ void CSignalQuality::paintEvent(QPaintEvent */*event*/){
     DrawScreen();
 }
 
-void CSignalQuality::ConsolidateSatData(std::map <int, SAT_INFO_T>&mapSatData) {
+void CSignalQuality::ConsolidateSatData(std::map <std::string, SAT_INFO_T>& mapSatData) {
 
     mapSatData.clear();
 
     //
-    // Get GPS information
+    // Get GPS/GNSS information
     //
+    // GPS
     CNMEAParserData::GSA_DATA_T gpgsaData;
     CNMEAParserData::GSV_DATA_T gpgsvData;
     m_pNMEAParser->GetGPGSA(gpgsaData);
     m_pNMEAParser->GetGPGSV(gpgsvData);
-
+    // GNSS (So far, have not seen a GNSGV)
     CNMEAParserData::GSA_DATA_T gngsaData;
     m_pNMEAParser->GetGNGSA(gngsaData);
-
+    // GLONASS
     CNMEAParserData::GSA_DATA_T glgsaData;
     CNMEAParserData::GSV_DATA_T glgsvData;
     m_pNMEAParser->GetGLGSA(glgsaData);
     m_pNMEAParser->GetGLGSV(glgsvData);
-
+    // GALILEO
     CNMEAParserData::GSV_DATA_T gagsvData;
     CNMEAParserData::GSA_DATA_T gagsaData;
     m_pNMEAParser->GetGAGSA(gagsaData);
     m_pNMEAParser->GetGAGSV(gagsvData);
 
-    // GPS
+
+    // First we'll go through all of the GSV data and then we'll proceed
+    // to the GSA data.
     SAT_INFO_T satInfo;
+    for(int i = 0; i < CNMEAParserData::c_nMaxConstellation; i++) {
+        // GPS
+        if(gpgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
+            memset(&satInfo, 0, sizeof(satInfo));
+            satInfo.nSNR = gpgsvData.SatInfo[i].nSNR;
+            satInfo.nPRN = gpgsvData.SatInfo[i].nPRN;
+
+            // GPS
+            if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
+                satInfo.nConstType = CT_GPS;
+            }
+            // GLONASS
+            else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
+                satInfo.nConstType = CT_GLONASS;
+            }
+
+            satInfo.strNmeaSpec = "GP" +  std::to_string(gpgsvData.SatInfo[i].nPRN);
+            mapSatData[satInfo.strNmeaSpec] = satInfo;
+        }
+        // Galileo
+        if(gagsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
+            memset(&satInfo, 0, sizeof(satInfo));
+            satInfo.nSNR = gagsvData.SatInfo[i].nSNR;
+            satInfo.nPRN = gagsvData.SatInfo[i].nPRN;
+            satInfo.nConstType = CT_GALILEO;
+            satInfo.strNmeaSpec = "EU" +  std::to_string(gagsvData.SatInfo[i].nPRN);
+            mapSatData[satInfo.strNmeaSpec] = satInfo;
+        }
+        // GLONASS
+        if(glgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
+            memset(&satInfo, 0, sizeof(satInfo));
+            satInfo.nSNR = glgsvData.SatInfo[i].nSNR;
+            satInfo.nPRN = glgsvData.SatInfo[i].nPRN;
+            satInfo.nConstType = CT_GLONASS;
+            satInfo.strNmeaSpec = "GP" +  std::to_string(glgsvData.SatInfo[i].nPRN);
+            mapSatData[satInfo.strNmeaSpec] = satInfo;
+        }
+    }
+
+
+    // GSA (figure out what satellites are used for navigagtion solution)
+    // GPS
     for(int i = 0; i < CNMEAParserData::c_nMaxGSASats; i++) {
         if(gpgsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
-            memset(&satInfo, 0, sizeof(satInfo));
-            satInfo.nPRN = gpgsaData.pnPRN[i];
-            satInfo.nSNR = 0;
-            satInfo.bUsedForNav = true;
-            mapSatData[satInfo.nPRN] = satInfo;
+            std::string strNmeaSpec = "GP" +  std::to_string(gpgsaData.pnPRN[i]);
+            mapSatData[strNmeaSpec].bUsedForNav = true;
         }
     }
 
     // Galileo
     for(int i = 0; i < CNMEAParserData::c_nMaxGSASats; i++) {
         if(gagsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
-            memset(&satInfo, 0, sizeof(satInfo));
-            satInfo.nPRN = gagsaData.pnPRN[i];
-            satInfo.nSNR = 0;
-            satInfo.bUsedForNav = true;
-            mapSatData[satInfo.nPRN] = satInfo;
+            std::string strNmeaSpec = "EU" +  std::to_string(gagsaData.pnPRN[i]);
+            mapSatData[strNmeaSpec].bUsedForNav = true;
         }
     }
 
     // GLONASS
     for(int i = 0; i < CNMEAParserData::c_nMaxConstellation; i++) {
         if(glgsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
-            memset(&satInfo, 0, sizeof(satInfo));
-            satInfo.nPRN = glgsaData.pnPRN[i];
-            satInfo.nSNR = 0;
-            satInfo.bUsedForNav = true;
-            mapSatData[satInfo.nPRN] = satInfo;
+            std::string strNmeaSpec = "GP" +  std::to_string(glgsaData.pnPRN[i]);
+            mapSatData[strNmeaSpec].bUsedForNav = true;
         }
     }
     // GN
     for(int i = 0; i < CNMEAParserData::c_nMaxConstellation; i++) {
         if(gngsaData.pnPRN[i] != CNMEAParserData::c_nInvlidPRN) {
-            memset(&satInfo, 0, sizeof(satInfo));
-            satInfo.nPRN = gngsaData.pnPRN[i];
-            satInfo.nSNR = 0;
-            satInfo.bUsedForNav = true;
-            mapSatData[satInfo.nPRN] = satInfo;
-        }
-    }
+            std::string strNmeaSpec = "GP" +  std::to_string(gngsaData.pnPRN[i]);
+            mapSatData[strNmeaSpec].bUsedForNav = true;
 
 
-    for(int i = 0; i < CNMEAParserData::c_nMaxConstellation; i++) {
-        // GPS
-        if(gpgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
-            mapSatData[gpgsvData.SatInfo[i].nPRN].nSNR = gpgsvData.SatInfo[i].nSNR;
-            mapSatData[gpgsvData.SatInfo[i].nPRN].nPRN = gpgsvData.SatInfo[i].nPRN;
-        }
-        // Galileo
-        if(gagsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
-            mapSatData[gagsvData.SatInfo[i].nPRN].nSNR = gagsvData.SatInfo[i].nSNR;
-            mapSatData[gagsvData.SatInfo[i].nPRN].nPRN = gagsvData.SatInfo[i].nPRN;
-        }
-        // GLONASS
-        if(glgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
-            mapSatData[glgsvData.SatInfo[i].nPRN].nSNR = glgsvData.SatInfo[i].nSNR;
-            mapSatData[glgsvData.SatInfo[i].nPRN].nPRN = glgsvData.SatInfo[i].nPRN;
+//             satInfo.nConstType = CT_GNSS;
+//             satInfo.strNmeaSpec = strNmeaSpec;
+//             mapSatData[strNmeaSpec] = satInfo;
+//             mapSatData[strNmeaSpec].bUsedForNav = true;
         }
     }
 }
@@ -137,7 +157,7 @@ void CSignalQuality::DrawScreen() {
     QPainter painter(this);
     QPalette pal;
 
-    std::map <int, SAT_INFO_T> mapSatData;
+    std::map <std::string, SAT_INFO_T> mapSatData;
     ConsolidateSatData(mapSatData);
 
     //
@@ -180,7 +200,7 @@ void CSignalQuality::DrawScreen() {
     QRectF rect(0, 0, dWidth, height() - dPRNTextBoxHeight);
     qreal x = 0;
 
-    for (std::map<int, SAT_INFO_T>::iterator it=mapSatData.begin(); it!=mapSatData.end(); ++it) {
+    for (std::map<std::string, SAT_INFO_T>::iterator it=mapSatData.begin(); it!=mapSatData.end(); ++it) {
         SAT_INFO_T satInfo = it->second;
         //
         // Draw background of signal quality
@@ -189,29 +209,48 @@ void CSignalQuality::DrawScreen() {
         painter.setBrush(pal.color(QPalette::Light));
         painter.drawRect(rect);
 
-        //CNMEAParserData::SAT_INFO_T satInfo = GetGSVRecordFromPRN(nPRN, CNMEAParserData::GSV_DATA_T& gsvData)
+        // Setup color
+        // Used for navigation solution?
+        if( satInfo.bUsedForNav == true) {
+            // GPS
+            if( satInfo.nConstType == CT_GPS ) {
+                painter.setBrush(QColor(0, 0, 128));
+            }
+            // GLONASS
+            else if( satInfo.nConstType == CT_GLONASS ){
+                painter.setBrush(QColor(128, 0, 0));
+            }
+            // Check for GNSS - here we have GPS and GLONASS
+            else if( satInfo.nConstType == CT_GNSS ){
+                // GPS
+                if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
+                    painter.setBrush(QColor(0, 0, 128));
+                }
+                // GLONASS
+                else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
+                    painter.setBrush(QColor(128, 0, 0));
+                }
+            }
+        }
+        // Not used for the navigation solution
+        else {
+            if( (satInfo.nConstType == CT_GPS) && (satInfo.nPRN >= NP_WAAS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) ) {
+                painter.setBrush(QColor(0, 128, 0));
+            }
+            else if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
+                painter.setBrush(QColor(64, 64, 64));
+            }
+            else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
+                painter.setBrush(QColor(64, 64, 64));
+            }
+            else {
+                painter.setBrush(QColor(64, 64, 64));
+            }
+        }
 
         //
         // Draw actual signal strength
         //
-        // Setup color
-        if( satInfo.bUsedForNav == true) {
-            if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
-                painter.setBrush(pal.color(QPalette::Highlight));
-            }
-            else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
-                painter.setBrush(QColor(128, 0, 0));
-            }
-        } else {
-
-            if( satInfo.nPRN >= NP_WAAS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
-                painter.setBrush(QColor(0, 128, 0));
-            }
-            else {
-                painter.setBrush(pal.color(QPalette::Shadow));
-            }
-        }
-
         qreal dRatio = static_cast<qreal>(rect.height()) / 50.0;
         QRectF rcSignal = rect;
         qreal dSigQual = static_cast<qreal>(satInfo.nSNR);
@@ -252,17 +291,5 @@ void CSignalQuality::DrawScreen() {
 
 QSize CSignalQuality::sizeHint () const{
     return QSize(200, 200);
-}
-
-CNMEAParserData::SAT_INFO_T CSignalQuality::GetGSVRecordFromPRN(int nPRN, CNMEAParserData::GSV_DATA_T& gsvData) {
-    CNMEAParserData::SAT_INFO_T satInfo;
-    memset(&satInfo, 0 , sizeof(CNMEAParserData::SAT_INFO_T));
-    for(int i = 0; i < CNMEAParserData::c_nMaxConstellation; i++) {
-        if(nPRN == gsvData.SatInfo[i].nPRN) {
-            return gsvData.SatInfo[i];
-        }
-    }
-
-    return satInfo;
 }
 
