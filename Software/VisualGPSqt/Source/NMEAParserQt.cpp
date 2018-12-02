@@ -27,6 +27,8 @@
 
 CNMEAParserQt::CNMEAParserQt(QObject *parent) :
     QObject(parent)
+    ,m_pReadNmeaFile(nullptr)
+    ,m_pReadNmeaFilePollTimer(nullptr)
 {
     ResetData();
     connect(&m_SerialPort, SIGNAL(readyRead()), SLOT(on_SerialPortReadyRead()));
@@ -51,6 +53,63 @@ bool CNMEAParserQt::Connect(QString strPort, quint32 nBaud)
         qDebug() << "CNMEAParserQt::Connect - connected successfully to port:" << strPort;
         return true;
     }
+}
+
+bool CNMEAParserQt::ConnectUsingFile(QString strFileName){
+
+    if(m_pReadNmeaFile != nullptr) {
+        CloseNmeaReadFile();
+    }
+    m_pReadNmeaFile = new QFile(strFileName);
+    if (!m_pReadNmeaFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
+        CloseNmeaReadFile();
+        return false;
+    }
+
+    // Don't need serial port for this mode
+    m_SerialPort.close();
+
+    ResetData();
+
+    m_pReadNmeaFilePollTimer = new QTimer(this);
+    connect(m_pReadNmeaFilePollTimer, SIGNAL(timeout()), this, SLOT(OnNmeaReadFileTimer()));
+    m_pReadNmeaFilePollTimer->start(1000);
+
+    return false;
+}
+
+void CNMEAParserQt::OnNmeaReadFileTimer() {
+    if(m_pReadNmeaFile != nullptr) {
+        if( m_pReadNmeaFile->atEnd() == false ) {
+            char pData[512];
+            qint64 uBytesRead = m_pReadNmeaFile->read(pData, 512    );
+            if(uBytesRead > 0) {
+                ProcessNMEABuffer(pData, static_cast<size_t>(uBytesRead));
+            }
+        }
+        // No nore data to read, now close the file
+        else {
+            CloseNmeaReadFile();
+        }
+    }
+}
+
+void CNMEAParserQt::CloseNmeaReadFile() {
+
+    // Stop time
+    if(m_pReadNmeaFilePollTimer != nullptr) {
+        m_pReadNmeaFilePollTimer->stop();
+        delete m_pReadNmeaFilePollTimer;
+        m_pReadNmeaFilePollTimer = nullptr;
+    }
+
+    // Close file
+    if(m_pReadNmeaFile != nullptr) {
+        m_pReadNmeaFile->close();
+        delete m_pReadNmeaFile;
+        m_pReadNmeaFile = nullptr;
+    }
+
 }
 
 void CNMEAParserQt::on_SerialPortReadyRead()

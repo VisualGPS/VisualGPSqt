@@ -22,7 +22,7 @@
      <x>0</x>
      <y>0</y>
      <width>760</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -36,6 +36,7 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Connect"/>
+    <addaction name="actionConnect_using_File"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -91,6 +92,11 @@
   <action name="actionExit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionConnect_using_File">
+   <property name="text">
+    <string>Connect using &amp;File</string>
    </property>
   </action>
  </widget>

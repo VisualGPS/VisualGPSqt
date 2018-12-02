@@ -231,20 +231,31 @@ void CSignalQuality::DrawScreen() {
                     painter.setBrush(QColor(128, 0, 0));
                 }
             }
+            // GALILEO
+            else if( satInfo.nConstType == CT_GALILEO ){
+                painter.setBrush(QColor(128, 128, 0));
+            }
         }
         // Not used for the navigation solution
         else {
-            if( (satInfo.nConstType == CT_GPS) && (satInfo.nPRN >= NP_WAAS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) ) {
-                painter.setBrush(QColor(0, 128, 0));
+            // GALILEO
+            if( satInfo.nConstType == CT_GALILEO ){
+                painter.setBrush(QColor(128, 0, 128));
             }
-            else if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
-                painter.setBrush(QColor(64, 64, 64));
-            }
-            else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
-                painter.setBrush(QColor(64, 64, 64));
-            }
+            // Everything else
             else {
-                painter.setBrush(QColor(64, 64, 64));
+                if( (satInfo.nConstType == CT_GPS) && (satInfo.nPRN >= NP_WAAS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) ) {
+                    painter.setBrush(QColor(0, 128, 0));
+                }
+                else if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
+                    painter.setBrush(QColor(64, 64, 64));
+                }
+                else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
+                    painter.setBrush(QColor(64, 64, 64));
+                }
+                else {
+                    painter.setBrush(QColor(64, 64, 64));
+                }
             }
         }
 

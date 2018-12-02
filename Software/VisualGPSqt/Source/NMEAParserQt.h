@@ -26,11 +26,12 @@
 #define NMEAPARSERQT_H
 
 #include <QObject>
+#include <QFile>
+#include <QTimer>
 #include <QSerialPort>
 #include "NMEAParser.h"
 
 #define NP_MAXFIELD                     256                         ///< Max field length
-//#define NP_MAX_CHAN						96                          ///< maximum number of channels
 #define NP_GPS_MIN_PRN                  1                           ///< Minimum PRN
 #define NP_GPS_MAX_PRN                  32                          ///< Minimum PRN
 #define NP_WAAS_MIN_PRN                 33                          ///< Minimum PRN
@@ -43,10 +44,13 @@ class CNMEAParserQt : public QObject, public CNMEAParser
 private:
     Q_OBJECT
     QSerialPort         m_SerialPort;                               ///< The serial port
+    QFile *             m_pReadNmeaFile;                            ///< Read a nmea file
+    QTimer *            m_pReadNmeaFilePollTimer;                   ///< Timer to read the NMEA read file a few bytes at a time
 
 public:
     explicit CNMEAParserQt(QObject *parent = nullptr);
     bool Connect(QString strPort, quint32 nBaud);
+    void CloseNmeaReadFile();
 
 signals:
     void NewPositionUpdateGPS();
@@ -54,6 +58,11 @@ signals:
 
 public slots:
     void on_SerialPortReadyRead();
+
+    bool ConnectUsingFile(QString strFileName);
+
+private slots:
+    void OnNmeaReadFileTimer();
 
 protected:
     ///

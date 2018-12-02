@@ -53,6 +53,8 @@ private slots:
     void on_action_About_triggered();
     void on_actionExit_triggered();
     void OnNMEAMessageProcessed();
+    void on_actionConnect_using_File_triggered();
+
 private:
     Ui::MainWindow *ui;
     void CreateWidgets();

@@ -25,6 +25,7 @@
 #include <QtCore>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QFileDialog>
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "ConnectDlg.h"
@@ -113,4 +114,14 @@ void MainWindow::CreateWidgets(){
 
 void MainWindow::OnNMEAMessageProcessed(){
     m_pRxLed->Ping(200);
+}
+
+void MainWindow::on_actionConnect_using_File_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open NMEA File"), "", tr("NMEA Files (*.txt *.nmea)"));
+
+    if(fileName != "") {
+        m_NMEAParser.ConnectUsingFile(fileName);
+    }
+
 }
