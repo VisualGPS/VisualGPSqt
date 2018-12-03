@@ -14,7 +14,7 @@ VisualGPSqt uses the NMEAParser and is included in this project as a git submodu
  ```
  * Using qtcreator, open VisualGPSqt/Software/VisualGPSqt/Source/VisualGPSqt.pro
  - Compile as normal
- - You may have to run as administrator depending on your permissions to access the serial port.
+ - **NOTE:** You may have to run as administrator depending on your permissions to access the serial port.
 
  ## Windows Build
   * Make sure that you initialize and update the submodules.
