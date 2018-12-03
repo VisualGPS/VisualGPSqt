@@ -1,6 +1,10 @@
 # VisualGPSqt
-A QT application (GUI) that makes use of the VisualGPS/NMEAParser project.
+A QT application (GUI) that makes use of the https://github.com/VisualGPS/NMEAParser project. You should be able to build this project using your favorite operating system (Linux, Windows, or Mac OS).
 ![Qt Project making use of the NMEAParser.](./img/ss.png)
+
+## Building VisualGPSqt
+
+VisualGPSqt uses the NMEAParser and is included in this project as a git submodule. Make sure that you initialize and update git submodules. See below for more information. As for building VisualGPSqt, Simply use qtcreator IDE to open the .pro file and compile as normal. 
 
 ## Linux build
  * Make sure that you initialize and update the submodule.
