@@ -35,7 +35,7 @@ CLEDWnd::CLEDWnd(QWidget *parent) :
 {
 }
 
-void CLEDWnd::paintEvent(QPaintEvent */*event*/){
+void CLEDWnd::paintEvent(QPaintEvent * /*event*/){
     QPainter painter(this);
 
     //painter.setPen(Qt::NoPen);

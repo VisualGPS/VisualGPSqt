@@ -7,8 +7,6 @@
 QT       += core gui
 QT       += serialport
 
-QMAKE_CXXFLAGS += -Wno-deprecated
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = VisualGPSqt
