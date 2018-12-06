@@ -68,6 +68,9 @@ void CSignalQuality::ConsolidateSatData(std::map <std::string, SAT_INFO_T>& mapS
     CNMEAParserData::GSA_DATA_T gagsaData;
     m_pNMEAParser->GetGAGSA(gagsaData);
     m_pNMEAParser->GetGAGSV(gagsvData);
+    // BeiDou
+    CNMEAParserData::GSV_DATA_T bdgsvData;
+    m_pNMEAParser->GetBDGSV(bdgsvData);
 
 
     // First we'll go through all of the GSV data and then we'll proceed
@@ -108,6 +111,15 @@ void CSignalQuality::ConsolidateSatData(std::map <std::string, SAT_INFO_T>& mapS
             satInfo.nPRN = glgsvData.SatInfo[i].nPRN;
             satInfo.nConstType = CT_GLONASS;
             satInfo.strNmeaSpec = "GP" +  std::to_string(glgsvData.SatInfo[i].nPRN);
+            mapSatData[satInfo.strNmeaSpec] = satInfo;
+        }
+        // BeiDou
+        if(bdgsvData.SatInfo[i].nPRN != CNMEAParserData::c_nInvlidPRN) {
+            memset(&satInfo, 0, sizeof(satInfo));
+            satInfo.nSNR = bdgsvData.SatInfo[i].nSNR;
+            satInfo.nPRN = bdgsvData.SatInfo[i].nPRN;
+            satInfo.nConstType = CT_BEIDOU;
+            satInfo.strNmeaSpec = "BD" +  std::to_string(bdgsvData.SatInfo[i].nPRN);
             mapSatData[satInfo.strNmeaSpec] = satInfo;
         }
     }
@@ -214,44 +226,48 @@ void CSignalQuality::DrawScreen() {
         if( satInfo.bUsedForNav == true) {
             // GPS
             if( satInfo.nConstType == CT_GPS ) {
-                painter.setBrush(QColor(0, 0, 128));
+                painter.setBrush(QColor(0, 0, 255));
             }
             // GLONASS
             else if( satInfo.nConstType == CT_GLONASS ){
-                painter.setBrush(QColor(128, 0, 0));
+                painter.setBrush(QColor(255, 0, 0));
             }
             // Check for GNSS - here we have GPS and GLONASS
             else if( satInfo.nConstType == CT_GNSS ){
                 // GPS
                 if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
-                    painter.setBrush(QColor(0, 0, 128));
+                    painter.setBrush(QColor(0, 0, 255));
                 }
                 // GLONASS
                 else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
-                    painter.setBrush(QColor(128, 0, 0));
+                    painter.setBrush(QColor(255, 0, 0));
                 }
             }
             // GALILEO
             else if( satInfo.nConstType == CT_GALILEO ){
-                painter.setBrush(QColor(128, 128, 0));
+                painter.setBrush(QColor(255, 255, 0));
             }
         }
         // Not used for the navigation solution
         else {
             // GALILEO
             if( satInfo.nConstType == CT_GALILEO ){
-                painter.setBrush(QColor(128, 0, 128));
+                painter.setBrush(QColor(64, 64, 0));
+            }
+            // BeiDou
+            else if( satInfo.nConstType == CT_BEIDOU ){
+                painter.setBrush(QColor(0, 128, 128));
             }
             // Everything else
             else {
                 if( (satInfo.nConstType == CT_GPS) && (satInfo.nPRN >= NP_WAAS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) ) {
-                    painter.setBrush(QColor(0, 128, 0));
+                    painter.setBrush(QColor(0, 64, 0));
                 }
                 else if( satInfo.nPRN >= NP_GPS_MIN_PRN && satInfo.nPRN <= NP_WAAS_MAX_PRN) {
-                    painter.setBrush(QColor(64, 64, 64));
+                    painter.setBrush(QColor(0, 0, 64));
                 }
                 else if( satInfo.nPRN >= NP_GLONASS_MIN_PRN && satInfo.nPRN <= NP_GLONASS_MAX_PRN){
-                    painter.setBrush(QColor(64, 64, 64));
+                    painter.setBrush(QColor(64, 0, 0));
                 }
                 else {
                     painter.setBrush(QColor(64, 64, 64));

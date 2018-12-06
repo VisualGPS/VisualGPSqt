@@ -44,6 +44,7 @@ private:
         CT_GLONASS,                                         ///< GLONASS (Russia)
         CT_GNSS,                                            ///< GNSS (mixed - US/RUSSIA - but can differ)
         CT_GALILEO,                                         ///< Galileo (EU)
+        CT_BEIDOU,                                          ///< Beidou constellation
     };
 
     typedef struct _SAT_INFO_T {

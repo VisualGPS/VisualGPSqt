@@ -36,6 +36,7 @@ CNMEAParserQt::CNMEAParserQt(QObject *parent) :
 
 bool CNMEAParserQt::Connect(QString strPort, quint32 nBaud)
 {
+    CloseNmeaReadFile();
     m_SerialPort.close();
     m_SerialPort.setBaudRate(static_cast<qint32>(nBaud));
     m_SerialPort.setFlowControl(QSerialPort::NoFlowControl);
