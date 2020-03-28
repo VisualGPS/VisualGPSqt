@@ -81,20 +81,22 @@ void CPositionStatusWnd::paintEvent(QPaintEvent */*event*/){
             "Longitude: \n"
             "Altitude:  \n"
             "Speed:     \n"
+            "GPS Time:  \n"
             ;
     painter.drawText(rcDraw, str);
     QRectF rcTextBounds = painter.boundingRect(rcDraw, Qt::AlignLeft, str);
 
-    str = QString(
-            "%1 \n"
-            "%2\n"
-            "%3\n"
-            "%4 Kts"
-            ).arg(ggaData.m_dLatitude)
-            .arg(ggaData.m_dLongitude)
-            .arg(ggaData.m_dAltitudeMSL)
-            .arg(rmcData.m_dSpeedKnots)
-            ;
+    str.sprintf("%f\n"
+                "%f\n"
+                "%.02f\n"
+                "%.02fM\n"
+                "%02d:%02d:%02d %04d\n",
+                ggaData.m_dLatitude,
+                ggaData.m_dLongitude,
+                ggaData.m_dAltitudeMSL,
+                rmcData.m_dSpeedKnots,
+                ggaData.m_nHour, ggaData.m_nMinute, ggaData.m_nSecond, rmcData.m_nYear
+                );
     rcTextBounds.setLeft(rcTextBounds.right() + fontMetrics.averageCharWidth());
     rcTextBounds.setRight(rcDraw.right());
     painter.drawText(rcTextBounds, str);
