@@ -88,8 +88,8 @@ void CPositionStatusWnd::paintEvent(QPaintEvent */*event*/){
 
     str.sprintf("%f\n"
                 "%f\n"
-                "%.02f\n"
-                "%.02fM\n"
+                "%.02f M\n"
+                "%.02f KT\n"
                 "%02d:%02d:%02d %04d\n",
                 ggaData.m_dLatitude,
                 ggaData.m_dLongitude,
